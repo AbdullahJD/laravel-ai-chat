@@ -13,9 +13,14 @@ return [
     | a conventional file to locate the various service credentials.
     |
     */
-    'hf' => [
-        'api_key' => env('HF_API_KEY'),
+    // 'hf' => [
+    //     'api_key' => env('HF_API_KEY'),
+    // ],
+
+    'openrouter' => [
+        'api_key' => env('OPENROUTER_API_KEY'),
     ],
+
 
     'mailgun' => [
         'domain' => env('MAILGUN_DOMAIN'),

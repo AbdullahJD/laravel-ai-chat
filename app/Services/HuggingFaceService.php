@@ -6,20 +6,28 @@ use Illuminate\Support\Facades\Log;
 
 class HuggingFaceService {
     public function askAI($prompt) {
-        // إرسال الـ prompt الذي تم تلقيه من المستخدم
+        $apiKey = config('services.openrouter.api_key');
+
+        if (!$apiKey) {
+            Log::error('❌ OpenRouter API key is missing!');
+            return ['error' => 'API key is missing!'];
+        }
+
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . config('services.hf.api_key'),
+            'Authorization' => "Bearer $apiKey",  // ✅ تأكد من أن التوكين مرسل بشكل صحيح
             'Content-Type' => 'application/json',
         ])->timeout(60)
-        ->post('https://api-inference.huggingface.co/models/EleutherAI/gpt-neo-2.7B', [
-            'inputs' => $prompt,  // استخدام المتغير $prompt الذي تم استلامه
+        ->post('https://openrouter.ai/api/v1/chat/completions', [
+            "model" => "mistralai/mistral-7b-instruct:free",
+            'messages' => [['role' => 'user', 'content' => $prompt]],
+            'max_tokens' => 200,
         ]);
 
-        // سجل الاستجابة في الـ Logs لتتمكن من رؤية تفاصيلها
-        Log::info('HuggingFace API Request:', ['prompt' => $prompt]);
-        Log::info('HuggingFace API Response:', ['response' => $response->json()]);
+        $jsonResponse = $response->json();
 
-        // إرجاع الاستجابة للنظام
-        return $response->json(); // إرجاع البيانات للواجهة
+        Log::info('✅ OpenRouter API Request:', ['prompt' => $prompt]);
+        Log::info('✅ OpenRouter API Response:', ['response' => $jsonResponse]);
+
+        return $jsonResponse;
     }
 }
